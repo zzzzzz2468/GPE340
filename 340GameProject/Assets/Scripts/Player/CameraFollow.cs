@@ -11,6 +11,8 @@ public class CameraFollow : MonoBehaviour
     //follows target at set position and speed
     private void FixedUpdate()
     {
+        if (target == null) return;
+
         Vector3 goTo = target.position + offset;
         Vector3 smoothGoTo = Vector3.Lerp(transform.position, goTo, speed);
         transform.position = smoothGoTo;

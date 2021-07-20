@@ -26,6 +26,29 @@ public class PlayerController : PlayerData
 
         //Rotate to face mouse
         RotateToMousePointer();
+
+        //deal damage to yourself and drop
+        if (Input.GetKeyDown(KeyCode.R))
+            GetComponent<Health>().TakeDamage(10);
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            weapon.Drop();
+            weapon = null;
+        }
+
+        //checks if there is a weapons
+        if (weapon == null) return;
+
+        //triggers the weapon
+        if (Input.GetButtonDown("Fire1"))
+        {
+            weapon.OnTriggerPull();
+            //weapon.OnMainActionStart.Invoke;
+        }
+        if (Input.GetButtonUp("Fire1"))
+        {
+            weapon.OnTriggerRelease();
+        }
     }
 
     public void RotateToMousePointer()
@@ -126,6 +149,96 @@ public class PlayerController : PlayerData
 
         //apply push force
         body.velocity = pushDir * pushPower;
+    }
 
+    //Equip the weapon when the player is in the trigger box
+    private void OnTriggerStay(Collider other)
+    {
+        if (weapon != null) return;
+
+        if(other.gameObject.layer == 6 && Input.GetKeyDown(KeyCode.E))
+            EquipWeapon(other.gameObject.name, other.gameObject);
+    }
+
+    //runs the code to equip the weapon
+    public void EquipWeapon(string name, GameObject other)
+    {
+        //destroys the weapon on the ground and spawns a new one in
+        weaponEquipped = true;
+        Destroy(other);
+
+        //runs through all the weapons and finds the corresponding weapon
+        for (int i = 0; i < weapons.Count; i++)
+        {
+            if (weapons[i].name.Contains(name.Substring(0, 5)))
+            {
+                var tempWeapon = Instantiate(weapons[i]);
+                tempWeapon.GetComponent<Weapon>().container = rifleContainer;
+
+                //rifle and pistol are flipped, so i changed the rotation manually
+                if(name.Contains("Rifle")) tempWeapon.GetComponent<Weapon>().PickUp(180);
+                else if(name.Contains("Pistol")) tempWeapon.GetComponent<Weapon>().PickUp(0);
+
+                weapon = tempWeapon.gameObject.GetComponent<Weapon>();
+                tempWeapon.gameObject.layer = gameObject.layer;
+                break;
+            }
+        }
+    }
+
+    public void AddToScore(float points)
+    {
+
+    }
+
+    //sets up iks so the player can carry weapons correctly
+    public void OnAnimatorIK(int layerIndex)
+    {
+        if (weapon != null)
+        {
+            //changes where the player is looking when holding a weapon
+            if(weapon.gameObject.name.Contains("Rifle"))
+                anim.SetLookAtPosition(weapon.transform.position + (-10 * weapon.transform.forward));
+            else
+                anim.SetLookAtPosition(weapon.transform.position + (10 * weapon.transform.forward));
+            anim.SetLookAtWeight(1);
+
+            //sets the right hand postiton
+            if (weapon.rightHandPoint != null)
+            {
+                anim.SetIKPosition(AvatarIKGoal.RightHand, weapon.rightHandPoint.position);
+                anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
+                anim.SetIKRotation(AvatarIKGoal.RightHand, weapon.rightHandPoint.rotation);
+                anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
+            }
+            else
+            {
+                anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 0);
+                anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 0);
+            }
+
+            //sets the left hand position
+            if (weapon.leftHandPoint != null)
+            {
+                anim.SetIKPosition(AvatarIKGoal.LeftHand, weapon.leftHandPoint.position);
+                anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1);
+                anim.SetIKRotation(AvatarIKGoal.LeftHand, weapon.leftHandPoint.rotation);
+                anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1);
+            }
+            else
+            {
+                anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0);
+                anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0);
+            }
+        }
+        //resets the iks
+        else
+        {
+            anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 0);
+            anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 0);
+            anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0);
+            anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0);
+            anim.SetLookAtWeight(0);
+        }
     }
 }

@@ -68,6 +68,12 @@ public class PlayerData : Pawn
     protected CharacterController charCont; //Gets the character controller to access it
     #endregion
 
+    //weapon variables needed
+    public Weapon weapon;
+    [SerializeField] protected List<GameObject> weapons = new List<GameObject>();
+    [SerializeField] protected GameObject rifleContainer;
+    protected bool weaponEquipped = false;
+
     #region Start Function
     ///<Summary>
     ///Start function sets any of the varaibles that need to be set at the start of the game
