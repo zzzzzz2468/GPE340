@@ -14,10 +14,7 @@ public class PlayerData : Pawn
     ///The camera that will allow the camera to follow the player so they can see what they are doing
     ///</Summary>
 
-    [Header("Camera")]
-
-    [Tooltip("The main camera in the scene, allows the camera to follow the player")] 
-    [SerializeField] protected Camera playerCam;
+    [HideInInspector] public Camera playerCam;
     #endregion
 
     #region Jumping / Falling Variables

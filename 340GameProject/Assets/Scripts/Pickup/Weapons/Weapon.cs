@@ -17,6 +17,10 @@ public abstract class Weapon : MonoBehaviour
     [SerializeField] protected GameObject bullet;
     [SerializeField] protected GameObject barrel;
     [SerializeField] protected float bulletVelocity = 5f;
+    [SerializeField] protected int maxAmmo = 30;
+    protected int totalAmmo;
+    protected int curAmmo;
+    protected bool isReloading;
     [HideInInspector] public GameObject container;
 
     protected Rigidbody rb;
@@ -27,7 +31,8 @@ public abstract class Weapon : MonoBehaviour
 
     public virtual void Start()
     {
-
+        curAmmo = maxAmmo;
+        totalAmmo = maxAmmo * 2;
     }
 
     //checks if the trigger is pulled to shoot

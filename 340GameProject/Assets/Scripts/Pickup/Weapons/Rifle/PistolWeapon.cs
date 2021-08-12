@@ -16,10 +16,30 @@ public class PistolWeapon : Weapon
 
     public void Shoot()
     {
-        //shoots a bullet out from the barrel and changes the layer so it doesn't collide
+        //shoots a bullet out from the barrel and changes the layer so it doesn't collides
+        curAmmo -= 1;
         var projectile = Instantiate(bullet, barrel.transform.position, Quaternion.Euler(barrel.transform.rotation.x, barrel.transform.rotation.y + 90, barrel.transform.rotation.z));
         projectile.GetComponent<Rigidbody>().AddRelativeForce(-transform.right * bulletVelocity, ForceMode.VelocityChange);
         projectile.gameObject.layer = gameObject.layer;
+    }
+
+    //reloads the gun
+    public IEnumerator Reload()
+    {
+        isReloading = true;
+        yield return new WaitForSeconds(2);
+        var temp = maxAmmo - curAmmo;
+        if (totalAmmo >= temp)
+        {
+            curAmmo += temp;
+            totalAmmo -= temp;
+        }
+        else if(totalAmmo < temp)
+        {
+            curAmmo += totalAmmo;
+            totalAmmo = 0;
+        }
+        isReloading = false;
     }
 
     public override void OnTriggerHold()
@@ -30,7 +50,10 @@ public class PistolWeapon : Weapon
     //shoots when the player pulls the trigger
     public override void OnTriggerPull()
     {
-        Shoot();
+        if (curAmmo > 0)
+            Shoot();
+        else if(curAmmo <= 0 && !isReloading)
+            StartCoroutine(Reload());
     }
 
     public override void OnTriggerRelease()
